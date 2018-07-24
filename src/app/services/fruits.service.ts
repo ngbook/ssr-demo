@@ -22,7 +22,7 @@ export class FruitsService extends RequestBase {
 
     fetch(url): Observable<any> {
         const body = this.transferState.get(FRUITS_KEY, null);
-        console.log(body);
+        // console.log(body);
         if (this.platform.isBrowser && body) {
             return of(body);
         } else {

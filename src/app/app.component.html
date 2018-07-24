@@ -1,7 +1,8 @@
-<hello></hello>
 <div *ngIf="fruits$ | async as fruits; else loading">
     {{fruits | json}}
 </div>
 <ng-template #loading>
     Loading...
 </ng-template>
+
+<router-outlet></router-outlet>

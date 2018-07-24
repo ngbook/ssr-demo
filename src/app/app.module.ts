@@ -5,19 +5,19 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AppComponent } from './app.component';
 import { FruitsService } from './services/fruits.service';
-import { HelloComponent } from './hello/hello.component';
 import { PlatformModule } from './platform/platform.module';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
     declarations: [
         AppComponent,
-        HelloComponent
     ],
     imports: [
         CommonModule,
         NgtUniversalModule,
         HttpClientModule,
         PlatformModule,
+        AppRoutingModule,
     ],
     providers: [
         FruitsService
