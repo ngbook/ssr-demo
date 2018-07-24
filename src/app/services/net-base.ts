@@ -69,10 +69,6 @@ export class RequestBase {
         reqMethod: string,
         url: string, data?: any
     ): Observable<HttpResult> {
-        const options: any = {
-            observe: 'response',
-            headers: {}
-        };
         // server state
         let keyStr = `reqMethod+${url}+`;
         if (reqMethod === 'post' && data) {
@@ -86,6 +82,10 @@ export class RequestBase {
             return of(body);
         }
 
+        const options: any = {
+            observe: 'response',
+            headers: {}
+        };
         let observe: Observable<HttpEvent<Response>>;
         if (reqMethod === 'post') {
             options.headers['Content-Type'] = 'application/json';
