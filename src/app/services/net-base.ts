@@ -119,7 +119,7 @@ export class RequestBase {
     }
 
     private processRsp(rsp: HttpResponse<Response>): HttpResult {
-        console.log('- 处理返回 -', rsp);
+        // console.log('- 处理返回 -', rsp);
         const { body, ...opts } = rsp;
         const code = body && body.code;
         // 对共同code做处理

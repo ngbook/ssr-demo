@@ -11,7 +11,9 @@
         "build:server:prod": "ng run ssr-ng6:server && webpack --config webpack.server.config.js --progress --colors",
         "build:browser:prod": "ng build --prod",
         "build:prod": "npm run build:server:prod && npm run build:browser:prod",
-        "server": "node local.js"
+        "server": "node local.js",
+        "full": "npm run build:prod && npm run server",
+        "serve": "npm run build:browser:prod && npm run server"
     },
     "private": true,
     "dependencies": {
