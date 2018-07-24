@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { FruitsService } from './fruits.service';
+import { Component, OnInit, Optional, Inject, PLATFORM_ID } from '@angular/core';
+import { FruitsService } from './services/fruits.service';
+import { isPlatformServer } from '@angular/common';
 
 @Component({
     selector: 'app-root',
@@ -7,9 +8,12 @@ import { FruitsService } from './fruits.service';
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-    title = 'app';
     fruits: any;
-    constructor(private fruit: FruitsService) { }
+    constructor(
+        private fruit: FruitsService,
+        @Optional() @Inject(PLATFORM_ID) private platformId: {} | null,
+    ) { }
+    title = isPlatformServer(this.platformId) ? '服务端' : '浏览器端';
 
     ngOnInit() {
         this.fruits = this.fruit.fetch('fruit');
