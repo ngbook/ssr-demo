@@ -10,7 +10,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
     bootstrap: [AppComponent],
 
     imports: [
-        BrowserModule.withServerTransition({ appId: 'app-root' }),
+        BrowserModule.withServerTransition({ appId: 'ssr-test' }),
 
         AppModule,
 

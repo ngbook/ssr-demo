@@ -13,7 +13,11 @@ import {
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
-import 'rxjs/add/observable/of';
+import { of } from 'rxjs/observable/of';
+// 添加 MD5 库后，编译出的 main.js（压缩）多6k而已，gzip会更小
+import { Md5 } from 'ts-md5/dist/md5';
+import { makeStateKey, TransferState, StateKey } from '@angular/platform-browser';
+import { PlatformService } from '../platform/platform.service';
 
 const API_BASE_URL = 'https://api.ngbook.net/';
 
@@ -31,7 +35,11 @@ export interface HttpResult {
 @Injectable()
 export class RequestBase {
 
-    constructor(protected http: HttpClient) { }
+    constructor(
+        protected http: HttpClient,
+        private platform: PlatformService,
+        private transferState: TransferState
+    ) { }
 
     /**
      * Post 请求
@@ -65,6 +73,18 @@ export class RequestBase {
             observe: 'response',
             headers: {}
         };
+        // server state
+        let keyStr = `reqMethod+${url}+`;
+        if (reqMethod === 'post' && data) {
+            keyStr += JSON.stringify(data);
+        }
+        const md5 = Md5.hashStr(keyStr).toString().substr(12, 8);
+        const stateKey = makeStateKey<any>(md5);
+        const body = this.transferState.get(stateKey, null);
+        // console.log(stateKey);
+        if (this.platform.isBrowser && body) {
+            return of(body);
+        }
 
         let observe: Observable<HttpEvent<Response>>;
         if (reqMethod === 'post') {
@@ -75,20 +95,24 @@ export class RequestBase {
             observe = this.http.get<Response>(
                 url, options);
         }
+
         return observe
-            .map<HttpEvent<Response>,
-            HttpResult>(this.processRsp.bind(this))
-            .catch(error => this.handleError(error));
+            .map<HttpEvent<Response>, HttpResult>(
+                (rsp: HttpResponse<Response>) => {
+                    return this.processRsp(rsp, stateKey);
+                })
+            .catch(error => this.handleError(error, stateKey));
     }
 
     /**
      * 处理异常
      */
-    private handleError(error: HttpErrorResponse): Observable<HttpResult> {
+    private handleError(error: HttpErrorResponse,
+        stateKey: StateKey<any>): Observable<HttpResult> {
         if (error.error instanceof ErrorEvent) {
             // 网络错误，或浏览器引起的错误（不包含跨域）
             console.error('发生网络异常...', error.error.message);
-            return Observable.of<HttpResult>({
+            return of<HttpResult>({
                 body: {
                     code: 1001,
                     data: {
@@ -106,19 +130,20 @@ export class RequestBase {
                 const {
                     headers, status, statusText, url
                 } = error;
-                return Observable.of<HttpResult>(
+                return of<HttpResult>(
                     this.processRsp(
                         new HttpResponse<Response>({
                             body,
                             headers, status, statusText, url
-                        })
+                        }), stateKey
                     )
                 );
             }
         }
     }
 
-    private processRsp(rsp: HttpResponse<Response>): HttpResult {
+    private processRsp(rsp: HttpResponse<Response>,
+        stateKey: StateKey<any>): HttpResult {
         // console.log('- 处理返回 -', rsp);
         const { body, ...opts } = rsp;
         const code = body && body.code;
@@ -136,7 +161,9 @@ export class RequestBase {
                 // default handler...
                 break;
         }
-        return { body, opts };
+        const result = { body, opts };
+        this.transferState.set(stateKey, result);
+        return result;
     }
 
     private obj2urlParam(data: Object): string {

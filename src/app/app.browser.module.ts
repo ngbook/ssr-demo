@@ -11,7 +11,7 @@ import { AppModule } from './app.module';
     bootstrap: [AppComponent],
 
     imports: [
-        BrowserModule.withServerTransition({ appId: 'app-root' }),
+        BrowserModule.withServerTransition({ appId: 'ssr-test' }),
         BrowserTransferStateModule,
 
         AppModule,
